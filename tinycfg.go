@@ -99,13 +99,14 @@ func Decode(r io.Reader, required []string) (Config, []string, error) {
 			continue
 		}
 		args := strings.SplitN(line, delim, 2)
-		if args[0] == "" || args[1] == "" {
+		key, value := strings.TrimSpace(args[0]), strings.TrimSpace(args[1])
+		if key == "" || value == "" {
 			return cfg, nil, fmt.Errorf("no key/value pair found at line %d", lineNum)
 		}
-		if _, ok := cfg.vals[args[0]]; ok {
+		if _, ok := cfg.vals[key]; ok {
 			return cfg, nil, fmt.Errorf("duplicate entry for key %s at line %d", args[0], lineNum)
 		}
-		cfg.vals[strings.TrimSpace(args[0])] = strings.TrimSpace(args[1])
+		cfg.vals[key] = value
 	}
 	if scanner.Err() != nil {
 		return cfg, nil, scanner.Err()
