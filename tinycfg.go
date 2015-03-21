@@ -31,16 +31,19 @@ func (c Config) Get(key string) string {
 // newline characters or are empty.
 func (c Config) Set(key, value string) error {
 	if key == "" {
-		return errors.New("key cannot be blank")
+		return errors.New("key cannot be empty")
 	}
 	if value == "" {
-		return errors.New("value cannot be blank")
+		return errors.New("value cannot be empty")
 	}
 	if strings.Contains(key, delim) {
 		return fmt.Errorf("key cannot contain '%s'", delim)
 	}
 	if strings.Contains(value, "\n") {
 		return errors.New("value cannot contain newlines")
+	}
+	if strings.Contains(key, "\n") {
+		return errors.New("key cannot contain newlines")
 	}
 	c.vals[key] = value
 	return nil
@@ -88,20 +91,17 @@ func Open(path string, required []string) (Config, []string, error) {
 func Decode(r io.Reader, required []string) (Config, []string, error) {
 	cfg := Config{make(map[string]string)}
 	scanner := bufio.NewScanner(r)
-	var line string
-	var lineNum int
-	for scanner.Scan() {
-		lineNum++
-		line = strings.TrimSpace(scanner.Text())
+	for lineNum := 1; scanner.Scan(); lineNum++ {
+		line := strings.TrimSpace(scanner.Text())
 		if line == "" || strings.HasPrefix(line, commentPrefix) {
 			continue
 		}
 		args := strings.SplitN(line, delim, 2)
 		if args[0] == "" || args[1] == "" {
-			return Config{}, nil, fmt.Errorf("no key/value pair found at line %d", lineNum)
+			return cfg, nil, fmt.Errorf("no key/value pair found at line %d", lineNum)
 		}
 		if _, ok := cfg.vals[args[0]]; ok {
-			return Config{}, nil, fmt.Errorf("duplicate entry for key %s at line %d", args[0], lineNum)
+			return cfg, nil, fmt.Errorf("duplicate entry for key %s at line %d", args[0], lineNum)
 		}
 		cfg.vals[strings.TrimSpace(args[0])] = strings.TrimSpace(args[1])
 	}
@@ -116,7 +116,7 @@ func Decode(r io.Reader, required []string) (Config, []string, error) {
 			}
 		}
 		if len(missing) > 0 {
-			return Config{}, missing, fmt.Errorf("missing required fields: %s", strings.Join(missing, " "))
+			return cfg, missing, fmt.Errorf("missing required keys")
 		}
 	}
 	return cfg, nil, nil
