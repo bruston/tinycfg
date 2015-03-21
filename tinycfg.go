@@ -15,14 +15,20 @@ const (
 	commentPrefix = "//"
 )
 
+// A Config stores key, value pairs.
 type Config struct {
 	vals map[string]string
 }
 
+// Get returns the value for a specified key or an empty string if the key was not found.
 func (c Config) Get(key string) string {
 	return c.vals[key]
 }
 
+// Set adds a key, value pair or modifies an existing one. The returned error can be safely
+// ignored if you are certain that both the key and value are valid. Keys are invalid if
+// they contain '=', newline characters or are empty. Values are invalid if they contain
+// newline characters or are empty.
 func (c Config) Set(key, value string) error {
 	if key == "" {
 		return errors.New("key cannot be blank")
@@ -40,6 +46,7 @@ func (c Config) Set(key, value string) error {
 	return nil
 }
 
+// Delete removes a key, value pair.
 func (c Config) Delete(key string) {
 	delete(c.vals, key)
 }
@@ -59,10 +66,13 @@ func (c Config) Encode(w io.Writer) error {
 	return nil
 }
 
+// New returns an empty Config instance ready for use.
 func New() Config {
 	return Config{make(map[string]string)}
 }
 
+// Open is a convenience function that opens a file at a specified path, passes it to Encode
+// then closes the file.
 func Open(path string, required []string) (Config, []string, error) {
 	file, err := os.Open(path)
 	if err != nil {
@@ -72,6 +82,9 @@ func Open(path string, required []string) (Config, []string, error) {
 	return Decode(file, required)
 }
 
+// Decode creates a new Config instance from a Reader. Required keys can be specified by passing
+// in a string slice, or nil if there are no required keys. If there are missing required keys
+// they are returned in a string slice along with an error.
 func Decode(r io.Reader, required []string) (Config, []string, error) {
 	cfg := Config{make(map[string]string)}
 	scanner := bufio.NewScanner(r)
