@@ -104,7 +104,7 @@ func Decode(r io.Reader, required []string) (Config, []string, error) {
 			return cfg, nil, fmt.Errorf("no key/value pair found at line %d", lineNum)
 		}
 		if _, ok := cfg.vals[key]; ok {
-			return cfg, nil, fmt.Errorf("duplicate entry for key %s at line %d", args[0], lineNum)
+			return cfg, nil, fmt.Errorf("duplicate entry for key %s at line %d", key, lineNum)
 		}
 		cfg.vals[key] = value
 	}
