@@ -74,7 +74,7 @@ func New() Config {
 	return Config{make(map[string]string)}
 }
 
-// Open is a convenience function that opens a file at a specified path, passes it to Encode
+// Open is a convenience function that opens a file at a specified path, passes it to Decode
 // then closes the file.
 func Open(path string, required []string) (Config, []string, error) {
 	file, err := os.Open(path)
