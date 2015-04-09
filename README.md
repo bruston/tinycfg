@@ -1,6 +1,8 @@
 tinycfg
 =======
 
+**Under development and likely to change.**
+
 Package tinycfg provides minimal configuration file support using a simple key/value format.
 
 # Installation
