@@ -78,19 +78,17 @@ func New() Config {
 
 // Open is a convenience function that opens a file at a specified path, passes it to Decode
 // then closes the file.
-func Open(path string, required []string) (Config, []string, error) {
+func Open(path string) (Config, error) {
 	file, err := os.Open(path)
 	if err != nil {
-		return Config{}, nil, err
+		return Config{}, err
 	}
 	defer file.Close()
-	return Decode(file, required)
+	return Decode(file)
 }
 
-// Decode creates a new Config instance from a Reader. Required keys can be specified by passing
-// in a string slice, or nil if there are no required keys. If there are missing required keys
-// they are returned in a string slice along with an error.
-func Decode(r io.Reader, required []string) (Config, []string, error) {
+// Decode creates a new Config instance from a Reader.
+func Decode(r io.Reader) (Config, error) {
 	cfg := Config{make(map[string]string)}
 	scanner := bufio.NewScanner(r)
 	for lineNum := 1; scanner.Scan(); lineNum++ {
@@ -101,26 +99,30 @@ func Decode(r io.Reader, required []string) (Config, []string, error) {
 		args := strings.SplitN(line, delim, 2)
 		key, value := strings.TrimSpace(args[0]), strings.TrimSpace(args[1])
 		if key == "" || value == "" {
-			return cfg, nil, fmt.Errorf("no key/value pair found at line %d", lineNum)
+			return cfg, fmt.Errorf("no key/value pair found at line %d", lineNum)
 		}
 		if _, ok := cfg.vals[key]; ok {
-			return cfg, nil, fmt.Errorf("duplicate entry for key %s at line %d", key, lineNum)
+			return cfg, fmt.Errorf("duplicate entry for key %s at line %d", key, lineNum)
 		}
 		cfg.vals[key] = value
 	}
 	if scanner.Err() != nil {
-		return cfg, nil, scanner.Err()
+		return cfg, scanner.Err()
 	}
-	if required != nil {
-		var missing []string
-		for _, v := range required {
-			if val := cfg.Get(v); val == "" {
-				missing = append(missing, v)
-			}
-		}
-		if len(missing) > 0 {
-			return cfg, missing, fmt.Errorf("missing required keys")
+	return cfg, nil
+}
+
+// Missing checks for the existence of a slice of keys in a Config instance and returns a slice
+// which contains keys that are missing, or nil if there are no missing keys.
+func Missing(cfg Config, required []string) []string {
+	var missing []string
+	for _, k := range required {
+		if v := cfg.Get(k); v == "" {
+			missing = append(missing, k)
 		}
 	}
-	return cfg, nil, nil
+	if len(missing) > 0 {
+		return missing
+	}
+	return nil
 }

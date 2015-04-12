@@ -36,17 +36,11 @@ import (
 	"github.com/bruston/tinycfg"
 )
 
-var required = []string{"server", "port", "channel"}
-
 func main() {
-	cfg, missing, err := tinycfg.Open("example.cfg", required)
+	cfg, err := tinycfg.Open("example.cfg", required)
 	if err != nil {
-		if missing != nil {
-			log.Fatalf("missing required config keys: %v", missing)
-		}
 		log.Fatalf("unable to decode config file: %s", err)
 	}
-
 	fmt.Println(cfg.Get("server"), cfg.Get("port"), cfg.Get("channel"))
 	// irc.example.com 6667 #example
 }

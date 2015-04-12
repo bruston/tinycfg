@@ -25,26 +25,12 @@ var expected = Config{
 }
 
 func TestDecode(t *testing.T) {
-	cfg, missing, err := Decode(strings.NewReader(happyCase), nil)
+	cfg, err := Decode(strings.NewReader(happyCase))
 	if err != nil {
 		t.Fatalf("expecting nil error, got %s", err)
 	}
-	if missing != nil {
-		t.Errorf("missing should be nil, got %v", missing)
-	}
 	if !reflect.DeepEqual(cfg, expected) {
 		t.Errorf("expecting %#v\n received %#v", expected, cfg)
-	}
-}
-
-func TestDecodeWithRequired(t *testing.T) {
-	required := []string{"nonexistant"}
-	_, missing, err := Decode(strings.NewReader(happyCase), required)
-	if err == nil {
-		t.Errorf("expecting missing required fields error, got nil")
-	}
-	if !reflect.DeepEqual(missing, required) {
-		t.Errorf("expecting missing field slice: %v, got %v", required, missing)
 	}
 }
 
