@@ -2,6 +2,7 @@ package tinycfg
 
 import (
 	"bufio"
+	"bytes"
 	"errors"
 	"fmt"
 	"io"
@@ -125,4 +126,14 @@ func Missing(cfg Config, required []string) []string {
 		return missing
 	}
 	return nil
+}
+
+// NewFromEnv returns a new Config instance populated from environment variables.
+func NewFromEnv(keys []string) (Config, error) {
+	var buf bytes.Buffer
+	for _, k := range keys {
+		fmt.Fprintln(&buf, k, "=", os.Getenv(k))
+	}
+	cfg, err := Decode(&buf)
+	return cfg, err
 }
