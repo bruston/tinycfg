@@ -35,8 +35,8 @@ func TestDecode(t *testing.T) {
 }
 
 func TestEncode(t *testing.T) {
-	expected := `name=joe
-age=29
+	expected := `age=29
+name=joe
 team=gopher
 `
 	cfg := New()

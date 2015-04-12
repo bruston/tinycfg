@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"sort"
 	"strings"
 )
 
@@ -54,10 +55,17 @@ func (c Config) Delete(key string) {
 	delete(c.vals, key)
 }
 
-// Encode writes out a Config instance in the correct format to a Writer.
+// Encode writes out a Config instance in the correct format to a Writer. Key, value pairs
+// are listed in alphabetical order.
 func (c Config) Encode(w io.Writer) error {
+	var lines []string
 	for k, v := range c.vals {
-		if _, err := fmt.Fprintf(w, "%s=%s\n", k, v); err != nil {
+		lines = append(lines, fmt.Sprintf("%s=%s", k, v))
+	}
+	sort.Sort(sort.StringSlice(lines))
+	for _, v := range lines {
+		_, err := fmt.Fprintln(w, v)
+		if err != nil {
 			return fmt.Errorf("unable to encode line: %s\n%s", v, err)
 		}
 	}
