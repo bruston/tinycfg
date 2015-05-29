@@ -29,7 +29,7 @@ func TestDecode(t *testing.T) {
 	if err != nil {
 		t.Fatalf("expecting nil error, got %s", err)
 	}
-	if !reflect.DeepEqual(cfg, expected) {
+	if !reflect.DeepEqual(cfg, &expected) {
 		t.Errorf("expecting %#v\n received %#v", expected, cfg)
 	}
 }

@@ -22,7 +22,7 @@ type Config struct {
 }
 
 // Get returns the value for a specified key or an empty string if the key was not found.
-func (c Config) Get(key string) string {
+func (c *Config) Get(key string) string {
 	return c.vals[key]
 }
 
@@ -30,7 +30,7 @@ func (c Config) Get(key string) string {
 // ignored if you are certain that both the key and value are valid. Keys are invalid if
 // they contain '=', newline characters or are empty. Values are invalid if they contain
 // newline characters or are empty.
-func (c Config) Set(key, value string) error {
+func (c *Config) Set(key, value string) error {
 	if key == "" {
 		return errors.New("key cannot be empty")
 	}
@@ -51,13 +51,13 @@ func (c Config) Set(key, value string) error {
 }
 
 // Delete removes a key, value pair.
-func (c Config) Delete(key string) {
+func (c *Config) Delete(key string) {
 	delete(c.vals, key)
 }
 
 // Encode writes out a Config instance in the correct format to a Writer. Key, value pairs
 // are listed in alphabetical order.
-func (c Config) Encode(w io.Writer) error {
+func (c *Config) Encode(w io.Writer) error {
 	var lines []string
 	for k, v := range c.vals {
 		lines = append(lines, fmt.Sprintf("%s=%s", k, v))
@@ -73,24 +73,24 @@ func (c Config) Encode(w io.Writer) error {
 }
 
 // New returns an empty Config instance ready for use.
-func New() Config {
-	return Config{make(map[string]string)}
+func New() *Config {
+	return &Config{make(map[string]string)}
 }
 
 // Open is a convenience function that opens a file at a specified path, passes it to Decode
 // then closes the file.
-func Open(path string) (Config, error) {
+func Open(path string) (*Config, error) {
 	file, err := os.Open(path)
 	if err != nil {
-		return Config{}, err
+		return nil, err
 	}
 	defer file.Close()
 	return Decode(file)
 }
 
 // Decode creates a new Config instance from a Reader.
-func Decode(r io.Reader) (Config, error) {
-	cfg := Config{make(map[string]string)}
+func Decode(r io.Reader) (*Config, error) {
+	cfg := &Config{make(map[string]string)}
 	scanner := bufio.NewScanner(r)
 	for lineNum := 1; scanner.Scan(); lineNum++ {
 		line := strings.TrimSpace(scanner.Text())
@@ -115,7 +115,7 @@ func Decode(r io.Reader) (Config, error) {
 
 // DecodeWithDefaults creates a new Config instance and allows a map of defaults to be provided.
 // After decoding, the default key/value pairs are set if not already present.
-func DecodeWithDefaults(r io.Reader, defaults map[string]string) (Config, error) {
+func DecodeWithDefaults(r io.Reader, defaults map[string]string) (*Config, error) {
 	cfg, err := Decode(r)
 	if err != nil {
 		return cfg, err
@@ -146,7 +146,7 @@ func Missing(cfg Config, required []string) []string {
 }
 
 // NewFromEnv returns a new Config instance populated from environment variables.
-func NewFromEnv(keys []string) (Config, error) {
+func NewFromEnv(keys []string) (*Config, error) {
 	var buf bytes.Buffer
 	for _, k := range keys {
 		fmt.Fprintln(&buf, k, "=", os.Getenv(k))
