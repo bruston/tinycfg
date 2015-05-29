@@ -34,6 +34,23 @@ func TestDecode(t *testing.T) {
 	}
 }
 
+func TestDecodeWithDefaults(t *testing.T) {
+	defaults := map[string]string{
+		"name":       "Imposter",
+		"occupation": "mascot",
+	}
+	cfg, err := DecodeWithDefaults(strings.NewReader("name = Gordon Gopher"), defaults)
+	if err != nil {
+		t.Fatalf("expecting nil error, got %s", err)
+	}
+	if cfg.Get("name") != "Gordon Gopher" {
+		t.Errorf("name should be 'Gordon Gopher', got: %s", cfg.Get("name"))
+	}
+	if cfg.Get("occupation") != "mascot" {
+		t.Errorf("expecting occupation to be 'mascot', got %s", cfg.Get("occupation"))
+	}
+}
+
 func TestEncode(t *testing.T) {
 	expected := `age=29
 name=joe
@@ -51,5 +68,3 @@ team=gopher
 		t.Errorf("expected: %s\nreceived: %s", expected, buf.String())
 	}
 }
-
-// TODO: Refactor and test bad inputs.
