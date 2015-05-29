@@ -9,6 +9,7 @@ import (
 	"os"
 	"sort"
 	"strings"
+	"sync"
 )
 
 const (
@@ -18,11 +19,14 @@ const (
 
 // A Config stores key, value pairs.
 type Config struct {
+	mu   sync.RWMutex
 	vals map[string]string
 }
 
 // Get returns the value for a specified key or an empty string if the key was not found.
 func (c *Config) Get(key string) string {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
 	return c.vals[key]
 }
 
@@ -46,12 +50,16 @@ func (c *Config) Set(key, value string) error {
 	if strings.Contains(key, "\n") {
 		return errors.New("key cannot contain newlines")
 	}
+	c.mu.Lock()
 	c.vals[key] = value
+	c.mu.Unlock()
 	return nil
 }
 
 // Delete removes a key, value pair.
 func (c *Config) Delete(key string) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
 	delete(c.vals, key)
 }
 
@@ -59,6 +67,8 @@ func (c *Config) Delete(key string) {
 // are listed in alphabetical order.
 func (c *Config) Encode(w io.Writer) error {
 	var lines []string
+	c.mu.RLock()
+	defer c.mu.RUnlock()
 	for k, v := range c.vals {
 		lines = append(lines, fmt.Sprintf("%s=%s", k, v))
 	}
@@ -74,7 +84,7 @@ func (c *Config) Encode(w io.Writer) error {
 
 // New returns an empty Config instance ready for use.
 func New() *Config {
-	return &Config{make(map[string]string)}
+	return &Config{vals: make(map[string]string)}
 }
 
 // Open is a convenience function that opens a file at a specified path, passes it to Decode
@@ -90,7 +100,7 @@ func Open(path string) (*Config, error) {
 
 // Decode creates a new Config instance from a Reader.
 func Decode(r io.Reader) (*Config, error) {
-	cfg := &Config{make(map[string]string)}
+	cfg := &Config{vals: make(map[string]string)}
 	scanner := bufio.NewScanner(r)
 	for lineNum := 1; scanner.Scan(); lineNum++ {
 		line := strings.TrimSpace(scanner.Text())
@@ -132,7 +142,7 @@ func DecodeWithDefaults(r io.Reader, defaults map[string]string) (*Config, error
 
 // Missing checks for the existence of a slice of keys in a Config instance and returns a slice
 // which contains keys that are missing, or nil if there are no missing keys.
-func Missing(cfg Config, required []string) []string {
+func Missing(cfg *Config, required []string) []string {
 	var missing []string
 	for _, k := range required {
 		if v := cfg.Get(k); v == "" {
