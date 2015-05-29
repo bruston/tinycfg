@@ -13,6 +13,16 @@ $ go get github.com/bruston/tinycfg
 
 https://godoc.org/github.com/bruston/tinycfg
 
+# Limitations
+
+`tinycfg` is minimalistic, likely *too* minimalistic for many projects. As a result of this, there are some limitations that need to be pointed out:
+
+- keys and values are strings
+- keys cannot contain '=' or newlines
+- values cannot contain newlines or be empty (but may contain '=')
+
+If you require more than just strings, look to the [strconv](http://golang.org/pkg/strconv/) package for help converting to other types. Or use one of the other configuration packages out there.
+
 # Format
 
 ```
