@@ -123,21 +123,16 @@ func Decode(r io.Reader) (*Config, error) {
 	return cfg, nil
 }
 
-// DecodeWithDefaults creates a new Config instance and allows a map of defaults to be provided.
-// After decoding, the default key/value pairs are set if not already present.
-func DecodeWithDefaults(r io.Reader, defaults map[string]string) (*Config, error) {
-	cfg, err := Decode(r)
-	if err != nil {
-		return cfg, err
-	}
+// Defaults is a convenience function that will apply a map of default key/values to a *Config, provided the keys are not already present.
+func Defaults(cfg *Config, defaults map[string]string) error {
 	for k, v := range defaults {
 		if cfg.Get(k) == "" {
 			if err := cfg.Set(k, v); err != nil {
-				return cfg, err
+				return err
 			}
 		}
 	}
-	return cfg, nil
+	return nil
 }
 
 // Missing checks for the existence of a slice of keys in a Config instance and returns a slice
