@@ -34,14 +34,17 @@ func TestDecode(t *testing.T) {
 	}
 }
 
-func TestDecodeWithDefaults(t *testing.T) {
+func TestDefaults(t *testing.T) {
 	defaults := map[string]string{
 		"name":       "Imposter",
 		"occupation": "mascot",
 	}
-	cfg, err := DecodeWithDefaults(strings.NewReader("name = Gordon Gopher"), defaults)
+	cfg, err := Decode(strings.NewReader("name = Gordon Gopher"))
 	if err != nil {
 		t.Fatalf("expecting nil error, got %s", err)
+	}
+	if err = Defaults(cfg, defaults); err != nil {
+		t.Fatalf("expecting nil error from Defaults, got %s", err)
 	}
 	if cfg.Get("name") != "Gordon Gopher" {
 		t.Errorf("name should be 'Gordon Gopher', got: %s", cfg.Get("name"))
