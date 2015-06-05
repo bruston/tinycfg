@@ -123,7 +123,8 @@ func Decode(r io.Reader) (*Config, error) {
 	return cfg, nil
 }
 
-// Defaults is a convenience function that will apply a map of default key/values to a *Config, provided the keys are not already present.
+// Defaults is a convenience function that will apply a map of default key/values to a *Config,
+// provided the keys are not already present.
 func Defaults(cfg *Config, defaults map[string]string) error {
 	for k, v := range defaults {
 		if cfg.Get(k) == "" {
