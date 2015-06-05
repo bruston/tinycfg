@@ -72,7 +72,7 @@ func (c *Config) Encode(w io.Writer) error {
 	for k, v := range c.vals {
 		lines = append(lines, fmt.Sprintf("%s=%s", k, v))
 	}
-	sort.Sort(sort.StringSlice(lines))
+	sort.Strings(lines)
 	for _, v := range lines {
 		_, err := fmt.Fprintln(w, v)
 		if err != nil {
