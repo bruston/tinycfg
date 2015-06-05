@@ -156,6 +156,5 @@ func NewFromEnv(keys []string) (*Config, error) {
 	for _, k := range keys {
 		fmt.Fprintln(&buf, k, "=", os.Getenv(k))
 	}
-	cfg, err := Decode(&buf)
-	return cfg, err
+	return Decode(&buf)
 }
