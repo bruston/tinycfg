@@ -110,15 +110,15 @@ func Decode(r io.Reader) (*Config, error) {
 		args := strings.SplitN(line, delim, 2)
 		key, value := strings.TrimSpace(args[0]), strings.TrimSpace(args[1])
 		if key == "" || value == "" {
-			return cfg, fmt.Errorf("no key/value pair found at line %d", lineNum)
+			return nil, fmt.Errorf("no key/value pair found at line %d", lineNum)
 		}
 		if _, ok := cfg.vals[key]; ok {
-			return cfg, fmt.Errorf("duplicate entry for key %s at line %d", key, lineNum)
+			return nil, fmt.Errorf("duplicate entry for key %s at line %d", key, lineNum)
 		}
 		cfg.vals[key] = value
 	}
 	if scanner.Err() != nil {
-		return cfg, scanner.Err()
+		return nil, scanner.Err()
 	}
 	return cfg, nil
 }
