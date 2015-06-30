@@ -45,7 +45,7 @@ import (
 )
 
 func main() {
-	cfg, err := tinycfg.Open("example.cfg", required)
+	cfg, err := tinycfg.Open("example.cfg")
 	if err != nil {
 		log.Fatalf("unable to decode config file: %s", err)
 	}
