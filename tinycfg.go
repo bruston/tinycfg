@@ -108,6 +108,9 @@ func Decode(r io.Reader) (*Config, error) {
 			continue
 		}
 		args := strings.SplitN(line, delim, 2)
+		if len(args) < 2 {
+			return nil, fmt.Errorf("unrecognized line format at line %d", lineNum)
+		}
 		key, value := strings.TrimSpace(args[0]), strings.TrimSpace(args[1])
 		if key == "" || value == "" {
 			return nil, fmt.Errorf("no key/value pair found at line %d", lineNum)
